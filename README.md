@@ -1,0 +1,1 @@
+# Hayarigami-Chinese-Localization
