@@ -259,12 +259,19 @@ class StoryParse(object):
             return
         if self.is_inline == 2 and self.fw_text:
             self.fw_text.write("####%d,%04d####\r\n" % (bid, self.buf_win_no))
-            self.fw_text.write(
-                self.buf_win.getvalue()
-                    .replace(u'㊧', u'♡')
-                    .replace(u'㊨', u'廆')
-                    .replace(u'㊤', u'㊧')
-                    .replace(u'㊦', u'㊨'))
+            if (bid, self.buf_win_no) in self.text_new:
+                self.fw_text.write(
+                    self.text_new[(bid, self.buf_win_no)]
+                    .replace(u"{r}", u"\r\n")
+                    .replace(u"{/}", u"{/}\r\n") +
+                    (u'\r\n\r\n' if self.buf_win.getvalue().endswith(u'\r\n\r\n') else ''))
+            else:
+                self.fw_text.write(
+                    self.buf_win.getvalue()
+                        .replace(u'㊧', u'♡')
+                        .replace(u'㊨', u'廆')
+                        .replace(u'㊤', u'㊧')
+                        .replace(u'㊦', u'㊨'))
             self.fw_text.write('\r\n')
         elif self.fw_code:
             self.fw_code.write("%d,%04d," % (bid, self.buf_win_no))
@@ -394,17 +401,7 @@ class StoryParse(object):
     def _parseText(self, text, info):
         bid, pos, num = info
         not self.is_inline and self._clear_buf_win(bid, num)
-        if (bid, num) in self.text_new:
-            string = self.text_new[(bid, num)]
-            string \
-                .replace(u"{r}", u"\r\n") \
-                .replace(u"{/}", u"{/}\r\n") \
-                .replace(u'㊧', u'㊤') \
-                .replace(u'㊨', u'㊦') \
-                .replace(u'♡', u'㊧') \
-                .replace(u'廆', u'㊨')
-
-        elif pos in self.text_old:
+        if pos in self.text_old:
             string = self.text_old[pos]
         else:
             # 此处是正常逻辑
@@ -414,6 +411,5 @@ class StoryParse(object):
 
 
 sp = StoryParse()
-sp.unpack("files/STORY.DAT")
-# sp.unpack("files/STORY.DAT", "old", "new")
-
+# sp.unpack("files/STORY.DAT")
+sp.unpack("files/STORY.DAT", "old", "new")
